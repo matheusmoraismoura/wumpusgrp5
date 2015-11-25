@@ -32,6 +32,7 @@
 % ?- start.
 
 :- load_files([wumpus3]).
+wumpusworld(pit3, 4). %definindo 3 buracos fixos
 
 init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um ponto (.)
 	writeln('Agente iniciando...'). % apague esse writeln e coloque aqui as acoes para iniciar o agente
