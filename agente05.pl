@@ -30,33 +30,41 @@
 % swipl -s agente007.pl
 % e faca a consulta (query) na forma:
 % ?- start.
+:-dynamic(agent_angulo/1).
 
 :- load_files([wumpus3]).
 wumpusworld(pit3, 4). %definindo 3 buracos fixos
 
 init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um ponto (.)
-	writeln('Agente iniciando...'). % apague esse writeln e coloque aqui as acoes para iniciar o agente
+    writeln('Agente iniciando...'), % apague esse writeln e coloque aqui as acoes para iniciar o agente
+    retractall(agent_angulo(_)),
+    assert(agent_angulo(0)).
 
 % esta funcao permanece a mesma. Nao altere.
 restart_agent :- 
-	init_agent.
+    init_agent.
 
 % esta e a funcao chamada pelo simulador. Nao altere a "cabeca" da funcao. Apenas o corpo.
 % Funcao recebe Percepcao, uma lista conforme descrito acima.
 % Deve retornar uma Acao, dentre as acoes validas descritas acima.
-  write('Valor da flecha: '), %introducao dos dados da fecha
-  writeln(Flecha).
-run_agent(Percepcao, Acao) :-
-  write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
+write('Valor da flecha: '), %introducao dos dados da fecha
+writeln(Flecha).
+  run_agent(Percepcao, Acao) :-
+   write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
   writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
+  write('Minha orientacao: '),
+  %listing(agent_direction(X)),
+  imprima_orien,
   forca(Percepcao, Acao). 
   %inicio da inteligencia/reacoes do agente...
- 
-  forca([no,no,no,no,_], goforward). %sem problemas a vista, continuapra frente
-  forca([_,_,no,yes,_], turnleft). %se trombrar na parede, vira a esquerda.
+
+  forca([_,_,no,no,_], goforward). %sem problemas a vista, continuapra frente
+  forca([_,_,no,yes,_], turnleft):- agent_angulo(Rotacao),  
+  Rotacao2 is (Rotacao + 90) mod 360,
+  retractall(agent_angulo(Rotacao)),
+  assert(agent_angulo(Rotacao2)). %se trombrar na parede, vira a esquerda.
   forca([_,_,yes,_,_], grab). %se sentir o brilhodo ouro, pagar
-  forca([yes,_,no,_,no], shoot):- 
-      agent_arrows(1).
-  %se sentir fedor, pode atirar sua flecha que vai em linha ate o fim do mapa.
-  
+  forca([yes,_,no,_,no], shoot):- agent_arrows(1). %se sentir fedor, pode atirar sua flecha que vai em linha ate o fim do mapa.
+  imprima_orien:-agent_angulo(X), write(X).  
+
 
