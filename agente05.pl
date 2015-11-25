@@ -30,7 +30,11 @@
 % swipl -s agente007.pl
 % e faca a consulta (query) na forma:
 % ?- start.
-:-dynamic(agent_angulo/1).
+:-dynamic([
+agent_angulo/1,
+antiga_posicao/1,
+atual_posicao/1
+]).
 
 :- load_files([wumpus3]).
 wumpusworld(pit3, 4). %definindo 3 buracos fixos
@@ -38,6 +42,10 @@ wumpusworld(pit3, 4). %definindo 3 buracos fixos
 init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um ponto (.)
     writeln('Agente iniciando...'), % apague esse writeln e coloque aqui as acoes para iniciar o agente
     retractall(agent_angulo(_)),
+    retractall(antiga_posicao(_,_)),
+    retractall(atual_posicao(_,_)),
+    assert(antiga_posicao(0,0)),
+    assert(atual_posicao(1,1)),
     assert(agent_angulo(0)).
 
 % esta funcao permanece a mesma. Nao altere.
@@ -49,22 +57,43 @@ restart_agent :-
 % Deve retornar uma Acao, dentre as acoes validas descritas acima.
 write('Valor da flecha: '), %introducao dos dados da fecha
 writeln(Flecha).
-  run_agent(Percepcao, Acao) :-
-   write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
+  run_agent(Percepcao, Acao):-
+      write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
   writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
+  doido(Percepcao, Acao),
   write('Minha orientacao: '),
-  %listing(agent_direction(X)),
   imprima_orien,
-  forca(Percepcao, Acao). 
+  write('Minha Atual Posicao: '),
+  imprima_pos,
+  write('Minha Antiga Posicao: '),
+  imprima_antpos.
+  %forca(Percepcao, Acao).
   %inicio da inteligencia/reacoes do agente...
 
-  forca([_,_,no,no,_], goforward). %sem problemas a vista, continuapra frente
-  forca([_,_,no,yes,_], turnleft):- agent_angulo(Rotacao),  
+  doido([_,_,no,no,_],goforward):-
+      atual_posicao(X,Y),
+      agent_angulo(Z),
+      nova_posicao(X,Y,Z,K,W),
+      retractall(atual_posicao(_,_)),
+      retractall(antiga_posicao(_,_)),
+      assert(antiga_posicao(X,Y)),
+      assert(atual_posicao(K,W)).
+
+  doido([_,_,no,yes,_], turnleft):- agent_angulo(Rotacao),  
   Rotacao2 is (Rotacao + 90) mod 360,
   retractall(agent_angulo(Rotacao)),
   assert(agent_angulo(Rotacao2)). %se trombrar na parede, vira a esquerda.
-  forca([_,_,yes,_,_], grab). %se sentir o brilhodo ouro, pagar
-  forca([yes,_,no,_,no], shoot):- agent_arrows(1). %se sentir fedor, pode atirar sua flecha que vai em linha ate o fim do mapa.
-  imprima_orien:-agent_angulo(X), write(X).  
+  doido([_,_,yes,_,_], grab). %se sentir o brilhodo ouro, pagar
+  doido([yes,_,no,_,no], shoot):- agent_arrows(1). %se sentir fedor, pode atirar sua flecha que vai em linha ate o fim do mapa.
+  imprima_orien:-agent_angulo(X), writeln(X).  
+  imprima_pos:- atual_posicao(X,Y),write(X),write(','),writeln(Y).
+  imprima_antpos:- antiga_posicao(X,Y),write(X),write(','),writeln(Y).
+
+  nova_posicao(X,Y,0,X1,Y):- X1 is (X+1).%o agent só andou pra frente
+  nova_posicao(X,Y,90,X,Y1):- Y1 is (Y+1). %o agent só andou pra cima
+  nova_posicao(X,Y,180,X1,Y):- X1 is (X-1).%o agent só andou para trás.
+  nova_posicao(X,Y,270,X,Y1):- Y1 is (Y-1). %o agent só andou para baixo.
+
+
 
 
