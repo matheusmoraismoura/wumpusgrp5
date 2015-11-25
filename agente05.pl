@@ -55,12 +55,15 @@ restart_agent :-
 % esta e a funcao chamada pelo simulador. Nao altere a "cabeca" da funcao. Apenas o corpo.
 % Funcao recebe Percepcao, uma lista conforme descrito acima.
 % Deve retornar uma Acao, dentre as acoes validas descritas acima.
-write('Valor da flecha: '), %introducao dos dados da fecha
-writeln(Flecha).
-  run_agent(Percepcao, Acao):-
-      write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
-  writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
+
+
+run_agent(Percepcao, Acao):-
+    write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
+writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
   doido(Percepcao, Acao),
+  %agent_arrows(Arrow),
+  %write('Quantidade de Flechas: '),
+  %writeln(Arrow),
   write('Minha orientacao: '),
   imprima_orien,
   write('Minha Atual Posicao: '),
@@ -79,12 +82,20 @@ writeln(Flecha).
       assert(antiga_posicao(X,Y)),
       assert(atual_posicao(K,W)).
 
-  doido([_,_,no,yes,_], turnleft):- agent_angulo(Rotacao),  
-  Rotacao2 is (Rotacao + 90) mod 360,
-  retractall(agent_angulo(Rotacao)),
-  assert(agent_angulo(Rotacao2)). %se trombrar na parede, vira a esquerda.
+  doido([_,_,no,yes,_], turnleft):- 
+      atual_posicao(X,Y),
+      agent_angulo(Rotacao),
+      ((Rotacao=:=0,X1 is (X-1),Y1 is Y)|(Rotacao=:=90,X1 is X,Y1 is (Y-1))|(Rotacao=:=180,X1 is (X+1),Y1 is Y)|(Rotacao=:=270,X1 is X,Y1 is (Y+1))),
+      retract(atual_posicao(X,Y)),
+      assert(atual_posicao(X1,Y1)),
+      Rotacao2 is (Rotacao + 90) mod 360,
+      retractall(agent_angulo(Rotacao)),
+      assert(agent_angulo(Rotacao2)). %se trombrar na parede, vira a esquerda.
+
   doido([_,_,yes,_,_], grab). %se sentir o brilhodo ouro, pagar
+
   doido([yes,_,no,_,no], shoot):- agent_arrows(1). %se sentir fedor, pode atirar sua flecha que vai em linha ate o fim do mapa.
+
   imprima_orien:-agent_angulo(X), writeln(X).  
   imprima_pos:- atual_posicao(X,Y),write(X),write(','),writeln(Y).
   imprima_antpos:- antiga_posicao(X,Y),write(X),write(','),writeln(Y).
@@ -93,6 +104,7 @@ writeln(Flecha).
   nova_posicao(X,Y,90,X,Y1):- Y1 is (Y+1). %o agent só andou pra cima
   nova_posicao(X,Y,180,X1,Y):- X1 is (X-1).%o agent só andou para trás.
   nova_posicao(X,Y,270,X,Y1):- Y1 is (Y-1). %o agent só andou para baixo.
+
 
 
 
