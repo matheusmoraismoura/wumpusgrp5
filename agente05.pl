@@ -51,6 +51,11 @@ run_agent(Percepcao, Acao) :-
   forca(Percepcao, Acao). 
   %inicio da inteligencia/reacoes do agente...
  
-   
-  %acoes do agente a serem desenvolvidas
+  forca([no,no,no,no,_], goforward). %sem problemas a vista, continuapra frente
+  forca([_,_,no,yes,_], turnleft). %se trombrar na parede, vira a esquerda.
+  forca([_,_,yes,_,_], grab). %se sentir o brilhodo ouro, pagar
+  forca([yes,_,no,_,no], shoot):- 
+      agent_arrows(1).
+  %se sentir fedor, pode atirar sua flecha que vai em linha ate o fim do mapa.
+  
 
