@@ -43,9 +43,14 @@ restart_agent :-
 % esta e a funcao chamada pelo simulador. Nao altere a "cabeca" da funcao. Apenas o corpo.
 % Funcao recebe Percepcao, uma lista conforme descrito acima.
 % Deve retornar uma Acao, dentre as acoes validas descritas acima.
+  write('Valor da flecha: '), %introducao dos dados da fecha
+  writeln(Flecha).
 run_agent(Percepcao, Acao) :-
   write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
   writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
-  write('O valor da flecha: '), %Introducao dos dados da fecha
-  writeln(Flecha),
+  forca(Percepcao, Acao). 
+  %inicio da inteligencia/reacoes do agente...
+ 
+   
+  %acoes do agente a serem desenvolvidas
 
