@@ -31,7 +31,8 @@
 % e faca a consulta (query) na forma:
 % ?- start.
 
-:- load_files([wumpus1]).
+:- load_files([wumpus3]).
+wumpusworld(pit3, 4). %definindo 3 buracos fixos
 
 init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um ponto (.)
 	writeln('Agente iniciando...'). % apague esse writeln e coloque aqui as acoes para iniciar o agente
@@ -43,10 +44,19 @@ restart_agent :-
 % esta e a funcao chamada pelo simulador. Nao altere a "cabeca" da funcao. Apenas o corpo.
 % Funcao recebe Percepcao, uma lista conforme descrito acima.
 % Deve retornar uma Acao, dentre as acoes validas descritas acima.
+  write('Valor da flecha: '), %introducao dos dados da fecha
+  writeln(Flecha).
 run_agent(Percepcao, Acao) :-
   write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
   writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
-  cabeca_dura(_, Acao).
-
-cabeca_dura(_, goforward). % "Inteligencia" do agente. Apague este exemplo e faca o seu.
+  forca(Percepcao, Acao). 
+  %inicio da inteligencia/reacoes do agente...
+ 
+  forca([no,no,no,no,_], goforward). %sem problemas a vista, continuapra frente
+  forca([_,_,no,yes,_], turnleft). %se trombrar na parede, vira a esquerda.
+  forca([_,_,yes,_,_], grab). %se sentir o brilhodo ouro, pagar
+  forca([yes,_,no,_,no], shoot):- 
+      agent_arrows(1).
+  %se sentir fedor, pode atirar sua flecha que vai em linha ate o fim do mapa.
+  
 
