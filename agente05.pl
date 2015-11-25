@@ -46,7 +46,6 @@ restart_agent :-
 run_agent(Percepcao, Acao) :-
   write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
   writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
-  cabeca_dura(_, Acao).
-
-cabeca_dura(_, goforward). % "Inteligencia" do agente. Apague este exemplo e faca o seu.
+  write('O valor da flecha: '), %Introducao dos dados da fecha
+  writeln(Flecha),
 
