@@ -58,7 +58,7 @@ init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um p
     assert(agent_flecha(1)),
     %assert(antiga_posicao([1,1])),
     assert(atual_posicao([1,1])),
-    assert(casas_seguras(_)),
+    assert(casas_seguras([[1,1]])),
     assert(agent_angulo(0)).
     
 
@@ -122,7 +122,8 @@ doido([yes,_,_,_,yes], goforward):- retractall(wumpus(_)),
         retractall(atual_posicao([_,_])),
         retractall(antiga_posicao([_,_])),
         assert(antiga_posicao([X,Y])),
-        assert(atual_posicao([K,W])).
+        assert(atual_posicao([K,W])),
+        salva_pos_segura.
 
 doido([yes,_,_,_,_],goforward):-atual_posicao([X,Y]),
         agent_angulo(Z),
@@ -130,7 +131,8 @@ doido([yes,_,_,_,_],goforward):-atual_posicao([X,Y]),
         retractall(atual_posicao([_,_])),
         retractall(antiga_posicao([_,_])),
         assert(antiga_posicao([X,Y])),
-        assert(atual_posicao([K,W])).
+        assert(atual_posicao([K,W])),
+        salva_pos_segura.
 
 
 imprima_orien:-agent_angulo(X), writeln(X).  
@@ -147,13 +149,17 @@ nova_posicao(X,Y,90,X,Y1):- Y1 is (Y+1). %o agent só andou pra cima
 nova_posicao(X,Y,180,X1,Y):- X1 is (X-1).%o agent só andou para trás.
 nova_posicao(X,Y,270,X,Y1):- Y1 is (Y-1). %o agent só andou para baixo.
 
-salva_pos_segura:-antiga_posicao(LIST1), 
+salva_pos_segura:-antiga_posicao(LIST1),
             casas_seguras(List),
-            append(List,[LIST1] ,NewList),
+          ((not(pertence(LIST1,List)),
+            append(List,[LIST1],NewList),
             retractall(casas_seguras(_)),
-            assert(casas_seguras(NewList)).
+            assert(casas_seguras(NewList)))|(true)).
 dec_flecha:-agent_flecha(X), X1 is (X-1), retractall(agent_flecha(_)), assert(agent_flecha(X1)).
 set_ouro:-agent_ouro(X), X1 is (X+1), retractall(agent_ouro(_)), assert(agent_ouro(X1)).
+
+pertence(X,[X|_]).
+pertence(X,[_|Y]):-pertence(X,Y).
 
 
 
