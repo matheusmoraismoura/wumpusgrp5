@@ -158,6 +158,9 @@ salva_pos_segura:-antiga_posicao(LIST1),
 dec_flecha:-agent_flecha(X), X1 is (X-1), retractall(agent_flecha(_)), assert(agent_flecha(X1)).
 set_ouro:-agent_ouro(X), X1 is (X+1), retractall(agent_ouro(_)), assert(agent_ouro(X1)).
 
+
+
+
 pertence(X,[X|_]).
 pertence(X,[_|Y]):-pertence(X,Y).
 
