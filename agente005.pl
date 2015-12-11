@@ -41,7 +41,7 @@ wumpus/1,
 hole/1
 ]).
 
-:- load_files([wumpus3]).
+:- load_files([wumpus3]). %definindo o mundo "3"
 wumpusworld(pit3, 4). %definindo 3 buracos fixos
 
 init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um ponto (.)
@@ -144,12 +144,12 @@ imprima_wumpus:- wumpus(X), ((X=:=0, writeln('Wumpus esta morto')) | (X=:=1, wri
 imprima_casas:-casas_seguras(List), writeln(List).
 
 
-nova_posicao(X,Y,0,X1,Y):- X1 is (X+1).%o agent só andou pra frente
-nova_posicao(X,Y,90,X,Y1):- Y1 is (Y+1). %o agent só andou pra cima
+nova_posicao(X,Y,0,X1,Y):- X1 is (X+1).%o agent só andou pra frente.
+nova_posicao(X,Y,90,X,Y1):- Y1 is (Y+1). %o agent só andou pra cima.
 nova_posicao(X,Y,180,X1,Y):- X1 is (X-1).%o agent só andou para trás.
 nova_posicao(X,Y,270,X,Y1):- Y1 is (Y-1). %o agent só andou para baixo.
 
-salva_pos_segura:-antiga_posicao(LIST1),
+salva_pos_segura:-antiga_posicao(LIST1),  %guardar os locais seguros para a volta
             casas_seguras(List),
           ((not(pertence(LIST1,List)),
             append(List,[LIST1],NewList),
@@ -163,6 +163,8 @@ set_ouro:-agent_ouro(X), X1 is (X+1), retractall(agent_ouro(_)), assert(agent_ou
 
 pertence(X,[X|_]).
 pertence(X,[_|Y]):-pertence(X,Y).
+
+
 
 
 
