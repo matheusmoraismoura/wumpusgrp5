@@ -164,7 +164,19 @@ set_ouro:-agent_ouro(X), X1 is (X+1), retractall(agent_ouro(_)), assert(agent_ou
 pertence(X,[X|_]).
 pertence(X,[_|Y]):-pertence(X,Y).
 
+%Casas adjacentes - Talvez precise de mais ajustes
 
+adjacentes([R,P],L):-
+    R\==1,
+    R\==4,
+    P\==1,
+    P\==4,
+    cima([R,P],L1),
+    baixo([R,P],L2),
+    esquerda([R,P],L3),
+    direita([R,P],L4),
+    write('Adjacentes:'),
+    writeln(L).
 
 
 
