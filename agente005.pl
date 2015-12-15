@@ -219,7 +219,69 @@ adjacentes([R,P],L):-
     write('Adjacentes:'),
     writeln(L).
 
+adjacentes([R,P],L):-
+    R\==1,
+    R\==4,
+    P==1,
+    esquerda([R,P],L3),
+    direita([R,P],L4),
+    cima([R,P],L1),
+    L=[L1,L3,L4],
+    write('Adjacentes:'),
+    writeln(L).
 
+adjacentes([R,P],L):-
+    R\==1,
+    R\==4,
+    P==4,
+    esquerda([R,P],L3),
+    direita([R,P],L4),
+    baixo([R,P],L2),
+    L=[L2,L3,L4],
+    write('Adjacentes:'),
+    writeln(L).
+
+adjacentes([R,P],L):-
+    P\==1,
+    P\==4,
+    R==1,
+    cima([R,P],L1),
+    baixo([R,P],L2),
+    direita([R,P],L4),
+    L=[L1,L2,L4],
+    write('Adjacentes:'),
+    writeln(L).
+
+adjacentes([R,P],L):-
+    P\==1,
+    P\==4,
+    R==4,
+    cima([R,P],L1),
+    baixo([R,P],L2)
+    esquerdaa([R,P],L3),
+    L=[L1,L2,L3],
+    write('Adjacentes:'),
+    writeln(L).
+
+%Calculos das coordenadas das casas adjacentes
+
+cima([R,P],L1):-
+    P1 is P+1,
+    L1=[R,P1].
+
+baixo([R,P],L2):-
+    P2 is P-1,
+    L2=[R,P2].
+
+esquerda([R,P],L3):-
+    R2 is R-1,
+    L3=[R2,P].
+
+direita([R,P],L4):-
+    R1 is R+1,
+    L4=[R1,P].
+
+%lembrando que talvez falte alguns ajustes
 
 
 
