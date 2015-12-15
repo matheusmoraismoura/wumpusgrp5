@@ -94,6 +94,8 @@ writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
   doido([_,_,_,_,_], climb):- atual_posicao([1,1]), agent_ouro(1).
   doido([_,_,_,_,_], climb):- atual_posicao([1,1]),wumpus(0).
 
+
+
 doido([no,_,no,no,no],goforward):-
       atual_posicao([X,Y]),
       agent_angulo(Z),
