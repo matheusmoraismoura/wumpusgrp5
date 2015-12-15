@@ -91,6 +91,9 @@ writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
   %forca(Percepcao, Acao).
   %inicio da inteligencia/reacoes do agente...
 
+  doido([_,_,_,_,_], climb):- atual_posicao([1,1]), agent_ouro(1).
+  doido([_,_,_,_,_], climb):- atual_posicao([1,1]),wumpus(0).
+
 doido([no,_,no,no,no],goforward):-
       atual_posicao([X,Y]),
       agent_angulo(Z),
@@ -135,6 +138,7 @@ doido([yes,_,_,_,_],goforward):-atual_posicao([X,Y]),
         salva_pos_segura.
 
 
+
 imprima_orien:-agent_angulo(X), writeln(X).  
 imprima_pos:- atual_posicao(LIST),writeln(LIST).
 imprima_antpos:- antiga_posicao(LIST),writeln(LIST).
@@ -175,6 +179,7 @@ adjacentes([R,P],L):-
     baixo([R,P],L2),
     esquerda([R,P],L3),
     direita([R,P],L4),
+    L=[L1,L2,L3,L4],
     write('Adjacentes:'),
     writeln(L).
 
@@ -191,7 +196,7 @@ adjacentes([R,P],L):-
     R==4,
     P==1,
     cima([R,P],L1),
-    esquerda([H,T],L3),
+    esquerda([R,P],L3),
     L=[L1,L3],
     write('Adjacentes:'),
     writeln(L).
