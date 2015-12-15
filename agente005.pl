@@ -259,7 +259,7 @@ adjacentes([R,P],L):-
     P\==4,
     R==4,
     cima([R,P],L1),
-    baixo([R,P],L2)
+    baixo([R,P],L2),
     esquerdaa([R,P],L3),
     L=[L1,L2,L3],
     write('Adjacentes:'),
