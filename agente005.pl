@@ -236,5 +236,27 @@ adjacentes([R,P],L):-
     write('Adjacentes:'),
     writeln(L).
 
+adjacentes([R,P],L):-
+    P\==1,
+    P\==4,
+    R==1,
+    cima([R,P],L1),
+    baixo([R,P],L2),
+    direita([R,P],L4),
+    L=[L1,L2,L4],
+    write('Adjacentes:'),
+    writeln(L).
+
+adjacentes([R,P],L):-
+    P\==1,
+    P\==4,
+    R==4,
+    cima([R,P],L1),
+    baixo([R,P],L2)
+    esquerdaa([R,P],L3),
+    L=[L1,L2,L3],
+    write('Adjacentes:'),
+    writeln(L).
+
 
 
