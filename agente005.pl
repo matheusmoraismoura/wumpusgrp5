@@ -258,5 +258,25 @@ adjacentes([R,P],L):-
     write('Adjacentes:'),
     writeln(L).
 
+%Calculos das coordenadas das casas adjacentes
+
+cima([R,P],L1):-
+    P1 is P+1,
+    L1=[R,P1].
+
+baixo([R,P],L2):-
+    P2 is P-1,
+    L2=[R,P2].
+
+esquerda([R,P],L3):-
+    R2 is R-1,
+    L3=[R2,P].
+
+direita([R,P],L4):-
+    R1 is R+1,
+    L4=[R1,P].
+
+%lembrando que talvez falte alguns ajustes
+
 
 
