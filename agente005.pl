@@ -64,7 +64,7 @@ init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um p
     assert(atual_posicao([1,1])),
     assert(casas_seguras([[1,1]])),
     assert(agent_angulo(0)).
-    
+
 
 % esta funcao permanece a mesma. Nao altere.
 restart_agent :- 
@@ -77,7 +77,8 @@ restart_agent :-
 
 run_agent(Percepcao, Acao):-
     write('percebi: '), % pode apagar isso se desejar. Imprima somente o necessario.
-writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
+writeln(Percepcao), % apague paraa limpar a saida. Coloque aqui seu codigo.
+  set_casas_seguras(Percepcao),
   doido(Percepcao, Acao),
   %agent_arrows(Arrow),
   %write('Quantidade de Flechas: '),
@@ -92,6 +93,7 @@ writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
   imprima_flecha,
   imprima_ouro,
   imprima_casas,
+  imprima_casas_seg,
   imprima_wumpus.
   %forca(Percepcao, Acao).
   %inicio da inteligencia/reacoes do agente...
@@ -102,47 +104,47 @@ writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
 
 
 doido([no,_,no,no,no],goforward):-
-      atual_posicao([X,Y]),
-      agent_angulo(Z),
-      nova_posicao(X,Y,Z,K,W),
-      retractall(atual_posicao([_,_])),
-      retractall(antiga_posicao([_,_])),
-      assert(antiga_posicao([X,Y])),
-      assert(atual_posicao([K,W])),
-      salva_pos_vis.
+    atual_posicao([X,Y]),
+    agent_angulo(Z),
+    nova_posicao(X,Y,Z,K,W),
+    retractall(atual_posicao([_,_])),
+    retractall(antiga_posicao([_,_])),
+    assert(antiga_posicao([X,Y])),
+    assert(atual_posicao([K,W])),
+    salva_pos_vis.
 
 doido([_,_,no,yes,_], turnleft):- 
-      atual_posicao([X,Y]),
-      agent_angulo(Rotacao),
-      ((Rotacao=:=0,X1 is (X-1),Y1 is Y)|(Rotacao=:=90,X1 is X,Y1 is (Y-1))|(Rotacao=:=180,X1 is (X+1),Y1 is Y)|(Rotacao=:=270,X1 is X,Y1 is (Y+1))),
-      retract(atual_posicao([X,Y])),
-      assert(atual_posicao([X1,Y1])),
-      Rotacao2 is (Rotacao + 90) mod 360,
-      retractall(agent_angulo(Rotacao)),
-      assert(agent_angulo(Rotacao2)). %se trombrar na parede, vira a esquerda.
+    atual_posicao([X,Y]),
+    agent_angulo(Rotacao),
+    ((Rotacao=:=0,X1 is (X-1),Y1 is Y)|(Rotacao=:=90,X1 is X,Y1 is (Y-1))|(Rotacao=:=180,X1 is (X+1),Y1 is Y)|(Rotacao=:=270,X1 is X,Y1 is (Y+1))),
+        retract(atual_posicao([X,Y])),
+        assert(atual_posicao([X1,Y1])),
+        Rotacao2 is (Rotacao + 90) mod 360,
+        retractall(agent_angulo(Rotacao)),
+        assert(agent_angulo(Rotacao2)). %se trombrar na parede, vira a esquerda.
 
-doido([_,_,yes,_,_], grab):-set_ouro. %se sentir o brilhodo ouro, pagar
+    doido([_,_,yes,_,_], grab):-set_ouro. %se sentir o brilhodo ouro, pagar
 
 doido([yes,_,_,_,_], shoot):- agent_flecha(X),X>0,dec_flecha. %se sentir fedor, pode atirar sua flecha que vai em linha ate o fim do mapa.
 doido([yes,_,_,_,yes], goforward):- retractall(wumpus(_)),
-        assert(wumpus(0)),
-        atual_posicao([X,Y]),
-        agent_angulo(Z),
-        nova_posicao(X,Y,Z,K,W),
-        retractall(atual_posicao([_,_])),
-        retractall(antiga_posicao([_,_])),
-        assert(antiga_posicao([X,Y])),
-        assert(atual_posicao([K,W])),
-        salva_pos_vis.
+assert(wumpus(0)),
+atual_posicao([X,Y]),
+agent_angulo(Z),
+nova_posicao(X,Y,Z,K,W),
+retractall(atual_posicao([_,_])),
+retractall(antiga_posicao([_,_])),
+assert(antiga_posicao([X,Y])),
+assert(atual_posicao([K,W])),
+salva_pos_vis.
 
 doido([yes,_,_,_,_],goforward):-atual_posicao([X,Y]),
-        agent_angulo(Z),
-        nova_posicao(X,Y,Z,K,W),
-        retractall(atual_posicao([_,_])),
-        retractall(antiga_posicao([_,_])),
-        assert(antiga_posicao([X,Y])),
-        assert(atual_posicao([K,W])),
-        salva_pos_vis.
+agent_angulo(Z),
+nova_posicao(X,Y,Z,K,W),
+retractall(atual_posicao([_,_])),
+retractall(antiga_posicao([_,_])),
+assert(antiga_posicao([X,Y])),
+assert(atual_posicao([K,W])),
+salva_pos_vis.
 
 
 
@@ -154,6 +156,7 @@ imprima_ouro:- agent_ouro(X), ((X=:=0, writeln('Estou sem Ouro')) | (X=:=1, writ
 imprima_wumpus:- wumpus(X), ((X=:=0, writeln('Wumpus esta morto')) | (X=:=1, writeln('Wumpus esta vivo'))).
 imprima_casas:-casas_visitadas(List), writeln(List).
 imprima_adjacentes:-atual_posicao(LIST),adjacentes(LIST,L),write('Casas Adjacentes'),writeln(L).
+imprima_casas_seg:-casas_seguras(LISTA),write('Casas Seguras: '),writeln(LISTA).
 
 nova_posicao(X,Y,0,X1,Y):- X1 is (X+1).%o agent só andou pra frente.
 nova_posicao(X,Y,90,X,Y1):- Y1 is (Y+1). %o agent só andou pra cima.
@@ -161,11 +164,11 @@ nova_posicao(X,Y,180,X1,Y):- X1 is (X-1).%o agent só andou para trás.
 nova_posicao(X,Y,270,X,Y1):- Y1 is (Y-1). %o agent só andou para baixo.
 
 salva_pos_vis:-antiga_posicao(LIST1),  %guardar os locais seguros para a volta
-            casas_visitadas(List),
-          ((not(pertence(LIST1,List)),
-            append(List,[LIST1],NewList),
-            retractall(casas_visitadas(_)),
-            assert(casas_visitadas(NewList)))|(true)).
+casas_visitadas(List),
+((not(pertence(LIST1,List)),
+    append(List,[LIST1],NewList),
+    retractall(casas_visitadas(_)),
+    assert(casas_visitadas(NewList)))|(true)).
 dec_flecha:-agent_flecha(X), X1 is (X-1), retractall(agent_flecha(_)), assert(agent_flecha(X1)).
 set_ouro:-agent_ouro(X), X1 is (X+1), retractall(agent_ouro(_)), assert(agent_ouro(X1)).
 
@@ -290,7 +293,33 @@ direita([R,P],L4):-
 
 %lembrando que talvez falte alguns ajustes
 %
+set_casas_seguras([no,no,_,_,_]):-atual_posicao(LIST),
+[X1,Y1]=LIST,
+X1<5,
+Y1<5,
+X1>0,
+Y1>0,
+adjacentes(LIST, T),
+casas_seguras(X),
+append([LIST], T, LISTA), 
+append(LISTA, X, LISTA1), 
+list_to_set(LISTA1,NOVALISTA),
+retractall(casas_seguras(_)),
+assert(casas_seguras(NOVALISTA)).
+
+set_casas_seguras([_,_,_,no,_]):-((atual_posicao(LIST),
+[X,Y]=LIST,
+X<5,
+Y<5,
+X>0,
+Y>0,
+casas_seguras(T),
+append([LIST], T, LISTA),
+list_to_set(LISTA, LISTA1),
+retractall(casas_seguras(_)),
+assert(casas_seguras(LISTA1)))).
 
 
+set_casas_seguras([_,_,_,_,_]):-true.
 
 
