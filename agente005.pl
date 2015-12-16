@@ -38,6 +38,8 @@ casas_seguras/1,
 agent_flecha/1,
 agent_ouro/1,
 wumpus/1,
+casas_suspeitas/1,
+casas_seguras/1,
 hole/1
 ]).
 
@@ -53,6 +55,8 @@ init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um p
     retractall(agent_flecha(_)),
     retractall(agent_ouro(_)),
     retractall(wumpus(_)),
+    retractall(casas_visitadas(_)),
+    assert(casas_visitadas([[1,1]])),
     assert(wumpus(1)),
     assert(agent_ouro(0)),
     assert(agent_flecha(1)),
@@ -84,6 +88,7 @@ writeln(Percepcao), % apague para limpar a saida. Coloque aqui seu codigo.
   imprima_pos,
   write('Minha Antiga Posicao: '),
   imprima_antpos,
+  imprima_adjacentes,
   imprima_flecha,
   imprima_ouro,
   imprima_casas,
@@ -104,7 +109,7 @@ doido([no,_,no,no,no],goforward):-
       retractall(antiga_posicao([_,_])),
       assert(antiga_posicao([X,Y])),
       assert(atual_posicao([K,W])),
-      salva_pos_segura.
+      salva_pos_vis.
 
 doido([_,_,no,yes,_], turnleft):- 
       atual_posicao([X,Y]),
@@ -128,7 +133,7 @@ doido([yes,_,_,_,yes], goforward):- retractall(wumpus(_)),
         retractall(antiga_posicao([_,_])),
         assert(antiga_posicao([X,Y])),
         assert(atual_posicao([K,W])),
-        salva_pos_segura.
+        salva_pos_vis.
 
 doido([yes,_,_,_,_],goforward):-atual_posicao([X,Y]),
         agent_angulo(Z),
@@ -137,7 +142,7 @@ doido([yes,_,_,_,_],goforward):-atual_posicao([X,Y]),
         retractall(antiga_posicao([_,_])),
         assert(antiga_posicao([X,Y])),
         assert(atual_posicao([K,W])),
-        salva_pos_segura.
+        salva_pos_vis.
 
 
 
@@ -147,20 +152,20 @@ imprima_antpos:- antiga_posicao(LIST),writeln(LIST).
 imprima_flecha:- agent_flecha(X), write('Flechas do agente: '), writeln(X).
 imprima_ouro:- agent_ouro(X), ((X=:=0, writeln('Estou sem Ouro')) | (X=:=1, writeln('Estou com o ouro'))).
 imprima_wumpus:- wumpus(X), ((X=:=0, writeln('Wumpus esta morto')) | (X=:=1, writeln('Wumpus esta vivo'))).
-imprima_casas:-casas_seguras(List), writeln(List).
-
+imprima_casas:-casas_visitadas(List), writeln(List).
+imprima_adjacentes:-atual_posicao(LIST),adjacentes(LIST,L),write('Casas Adjacentes'),writeln(L).
 
 nova_posicao(X,Y,0,X1,Y):- X1 is (X+1).%o agent só andou pra frente.
 nova_posicao(X,Y,90,X,Y1):- Y1 is (Y+1). %o agent só andou pra cima.
 nova_posicao(X,Y,180,X1,Y):- X1 is (X-1).%o agent só andou para trás.
 nova_posicao(X,Y,270,X,Y1):- Y1 is (Y-1). %o agent só andou para baixo.
 
-salva_pos_segura:-antiga_posicao(LIST1),  %guardar os locais seguros para a volta
-            casas_seguras(List),
+salva_pos_vis:-antiga_posicao(LIST1),  %guardar os locais seguros para a volta
+            casas_visitadas(List),
           ((not(pertence(LIST1,List)),
             append(List,[LIST1],NewList),
-            retractall(casas_seguras(_)),
-            assert(casas_seguras(NewList)))|(true)).
+            retractall(casas_visitadas(_)),
+            assert(casas_visitadas(NewList)))|(true)).
 dec_flecha:-agent_flecha(X), X1 is (X-1), retractall(agent_flecha(_)), assert(agent_flecha(X1)).
 set_ouro:-agent_ouro(X), X1 is (X+1), retractall(agent_ouro(_)), assert(agent_ouro(X1)).
 
@@ -260,7 +265,7 @@ adjacentes([R,P],L):-
     R==4,
     cima([R,P],L1),
     baixo([R,P],L2),
-    esquerdaa([R,P],L3),
+    esquerda([R,P],L3),
     L=[L1,L2,L3],
     write('Adjacentes:'),
     writeln(L).
@@ -284,6 +289,8 @@ direita([R,P],L4):-
     L4=[R1,P].
 
 %lembrando que talvez falte alguns ajustes
+%
+
 
 
 
