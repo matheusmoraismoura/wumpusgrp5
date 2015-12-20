@@ -711,4 +711,7 @@ mover_agent(Percp,TESTE):-
                          atualiza_posicao.
 
 
+        acao(_,A,_,AC):-
+            random_member(AC,[turnright,turnleft,goforward]).
+
 
