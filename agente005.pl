@@ -43,7 +43,8 @@ casas_suspeitas/1,
 casas_seguras/1,
 casas_suspeitas/1,
 hole/1,
-fuga/1
+fuga/1,
+jogadas/1
 ]).
 
 :- load_files([wumpus3]). %definindo o mundo "3"
@@ -60,6 +61,8 @@ init_agent :- % se nao tiver nada para fazer aqui, simplesmente termine com um p
     retractall(wumpus(_)),
     retractall(casas_suspeitas(_)),
     retractall(fuga(_)),
+    retractall(jogadas(_)),
+    assert(jogadas(0)),
     assert(fuga(0)),
     retractall(casas_visitadas(_)),
     assert(casas_suspeitas([_])),
@@ -103,6 +106,9 @@ imprima_casas,
 imprima_casas_seg,
 imprima_wumpus,
 %testa_casas,
+atualiza_jogada,
+testa_quantidade,
+ajusta_casas_seg,
 imprima_fuga.
 
   %inicio da inteligencia/reacoes do agente...
@@ -128,11 +134,28 @@ nova_posicao(X,Y,90,X,Y1):- Y1 is (Y+1). %o agent só andou pra cima.
 nova_posicao(X,Y,180,X1,Y):- X1 is (X-1).%o agent só andou para trás.
 nova_posicao(X,Y,270,X,Y1):- Y1 is (Y-1). %o agent só andou para baixo.
 
+atualiza_jogada:-jogadas(X),X1 is X+1,retractall(jogadas(_)),assert(jogadas(X1)).
+testa_quantidade:-jogadas(X),fuga(Y),((X>49,retractall(fuga(_)),assert(fuga(1)))|true).
+ajusta_casas_seg:-casas_seguras(S),retract(casas_seguras([_,0])).
+ajusta_casas_seg:-casas_seguras(S),retract(casas_seguras([0,_])).
+ajusta_casas_seg:-casas_seguras(S),retract(casas_seguras([_,5])).
+ajusta_casas_seg:-casas_seguras(S),retract(casas_seguras([5,_])).
+ajusta_casas_seg:-casas_seguras([[X,Y]]),X<0,retract(casas_seguras([X,Y])).
+ajusta_casas_seg:-casas_seguras([[X,Y]]),Y<0,retract(casas_seguras([X,Y])).
+ ajusta_casas_seg:-casas_seguras([[X,Y]]),X>5,retract(casas_seguras([X,Y])).
+  ajusta_casas_seg:-casas_seguras([[X,Y]]),Y>5,retract(casas_seguras([X,Y])).
+  ajusta_casas_seg:-true.
 
 
-salva_pos_vis:-atual_posicao(LIST1),  %guardar os locais seguros para a volta
+
+salva_pos_vis:-atual_posicao(LIST1),%guardar os locais seguros para a volta
+[Z,W]=LIST1,
 casas_visitadas(List),
 ((not(pertence(LIST1,List)),
+    Z>0,
+    Z<5,
+    W>0,
+    W<5,
     append(List,[LIST1],NewList),
     retractall(casas_visitadas(_)),
     assert(casas_visitadas(NewList)))|(true)).
@@ -162,6 +185,30 @@ adjacentes([R,P],L):-
      esquerda([R,P],L2),
      direita([R,P],L4),
      L=[L1,L2,L4].
+
+ adjacentes([R,P],L):-
+       R==3,
+       P==4,
+       baixo([R,P],L1),
+       esquerda([R,P],L2),
+       direita([R,P],L4),
+       L=[L1,L2,L4].
+   adjacentes([R,P],L):-
+            R==3,
+           P==1,
+           cima([R,P],L1),
+           esquerda([R,P],L2),
+            direita([R,P],L4),
+            L=[L1,L2,L4].
+
+
+ adjacentes([R,P],L):-
+        R==1,
+        P==1,
+        cima([R,P],L1),
+        direita([R,P],L4),
+        L=[L1,L4].
+
 
 adjacentes([R,P],L):-
     R\==1,
@@ -291,6 +338,9 @@ casas_seguras(X),
 append([LIST], T, LISTA),
 append(LISTA, X, LISTA1),
 not(member([_,0],LISTA1)),
+not(member([0,_],LISTA1)),
+not(member([_,5],LISTA1)),
+not(member([5,_],LISTA1)),
 list_to_set(LISTA1,NOVALISTA),
 retractall(casas_seguras(_)),
 assert(casas_seguras(NOVALISTA)).
@@ -306,6 +356,9 @@ casas_seguras(T),
 append([LIST], T, LISTA),
 list_to_set(LISTA, LISTA1),
 not(member([_,0],LISTA1)),
+not(member([0,_],LISTA1)),
+not(member([_,5],LISTA1)),
+not(member([5,_],LISTA1)),
 retractall(casas_seguras(_)),
 assert(casas_seguras(LISTA1)))).
 
@@ -336,7 +389,9 @@ subtract(T,R,X).
 
 testa_casas:-casas_seguras(S),
 casas_visitadas(L),
-((subtract(S,L,X),X==[],retractall(fuga(_)),assert(fuga(1)))|true).
+(jogadas(J),
+J>3,
+(subtract(S,L,X),X==[],retractall(fuga(_)),assert(fuga(1)))|true).
 
 
 esta(X,Y):-casas_seguintes([[X,Y]]).
@@ -344,10 +399,11 @@ esta(X,Y):-casas_seguintes([[X,Y]]).
 atualiza_posicao:-atual_posicao([X,Y]),
 agent_angulo(I),
 nova_posicao(X,Y,I,X1,Y1),
+(X1>0,X1<5,Y1>0,Y1<5,
 retractall(antiga_posicao(_)),
 assert(antiga_posicao([X,Y])),
 retractall(atual_posicao(_)),
-assert(atual_posicao([X1,Y1])).
+assert(atual_posicao([X1,Y1]))|true).
 
 vira_esquerda:-agent_angulo(Rotacao),
 Rotacao1 is (Rotacao+90) mod 360,
@@ -358,6 +414,34 @@ vira_direita:-agent_angulo(Rotacao),
 Rotacao1 is (Rotacao+270) mod 360,
 retractall(agent_angulo(_)),
 assert(agent_angulo(Rotacao1)).
+
+mover_agent([_,_,yes,_,_],grab):-set_ouro.
+
+mover_agent([yes,no,_,_,no],shoot):-
+    atual_posicao([X,Y]),
+         agent_angulo(I),
+         nova_posicao(X,Y,I,X1,Y1),
+         casas_seguras(T),
+         append(T,[[X1,Y1]],LISTA),
+         list_to_set(LISTA,NOVALISTA),
+         retractall(casas_seguras(_)),
+         assert(casas_seguras(NOVALISTA)),
+         wumpus(P),
+         P=:=1,
+         agent_flecha(L),
+         L>0,
+         dec_flecha.
+
+ mover_agent([yes,no,_,_,yes],gofoward):-
+    retractall(wumpus(_)),
+         assert(wumpus(0)),
+         atual_posicao(POS),
+         adjacentes(POS,L),
+         casas_seguras(T),
+         append(T,L,LISTA),
+         list_to_set(LISTA,NOVALISTA),
+         retractall(casas_seguras(_)),
+         assert(casas_seguras(NOVALISTA)).
 
 mover_agent(Percp,TESTE):-atual_posicao(LIST),
 agent_angulo(I),
@@ -376,14 +460,6 @@ fuga(X),
     ( O=:=1|X=:=1),
         TESTE=climb.
 
-    mover_agent(Percp,TESTE):-atual_posicao([X,Y]),
-    X=:=1,
-    Y=:=1,
-    wumpus(L),
-    L=:=1,
-    acao_1(Percp,TESTE).
-
-
 mover_agent(Percp,TESTE):-
     set_casas_seguras(Percp),
     agent_angulo(I),
@@ -394,7 +470,7 @@ mover_agent(Percp,TESTE):-
     O=:=0,
     not(P==[]),
     write('Escolha: '),writeln(A),
-    (acao_1(Percp,TESTE)|acao(POS,I,A, TESTE)),
+    acao(POS,I,A, TESTE),
         salva_pos_vis.
 
     mover_agent(Percp,TESTE):-
@@ -408,8 +484,14 @@ mover_agent(Percp,TESTE):-
         last(Y,P1),
         [A|B]=Y,
         write('Escolha: '),writeln(A),
-        (acao_1(Percp,TESTE)|acao(POS,I,P1, TESTE)),
+        acao(POS,I,P1, TESTE),
             salva_pos_vis.
+
+    mover_agent(_,TESTE):-
+        atual_posicao(POS),
+        agent_angulo(I),
+        acao(POS,I,[1,1], TESTE),
+        salva_pos_vis.
 
         acao([X1, Y], 0, [X2, Y], goforward):-
             X1<X2,
@@ -559,6 +641,11 @@ mover_agent(Percp,TESTE):-
             Y1<Y2,
             vira_direita.
 
+         acao([X1, Y1], 180, [X2, Y2], turnleft):-
+                         X1>X2,
+                         Y1>Y2,
+                         vira_esquerda.
+
         acao([X1, Y1], 180, [X2, Y2], goforward):-
             X1>X2,
             Y1>Y2,
@@ -616,31 +703,12 @@ mover_agent(Percp,TESTE):-
             Y1<Y2,
             vira_direita.
          
-        acao([_,_],_,[_,_],goforward):-
+        acao([_,_],I,[_,_],goforward):-
             casas_seguras(CasasSeguras),
                          atual_posicao([Z,W]),
-                         nova_posicao(Z,W,270,Z1,W1),
+                         nova_posicao(Z,W,I,Z1,W1),
                          member([Z1,W1], CasasSeguras),
                          atualiza_posicao.
 
-    acao_1([_,_,yes,_,_],grab):-set_ouro.
-    acao_1([yes,no,_,_,_],shoot):-atual_posicao([X,Y]),
-    agent_angulo(I),
-    nova_posicao(X,Y,I,X1,Y1),
-    casas_seguras(T),
-    append(T,[[X1,Y1]],LISTA),
-    list_to_set(LISTA,NOVALISTA),
-    retractall(casas_seguras(_)),
-    assert(casas_seguras(NOVALISTA)),
-    wumpus(P),
-    P=:=1,
-    agent_flecha(L),
-    L>0,
-    dec_flecha.
 
-acao_1([yes,yes,_,_,_],shoot):-   
-     wumpus(P),
-     P=:=1,
-     agent_flecha(L),
-     L>0,
-     dec_flecha.
+
