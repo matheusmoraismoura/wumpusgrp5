@@ -135,11 +135,11 @@ nova_posicao(X,Y,180,X1,Y):- X1 is (X-1).%o agent só andou para trás.
 nova_posicao(X,Y,270,X,Y1):- Y1 is (Y-1). %o agent só andou para baixo.
 
 atualiza_jogada:-jogadas(X),X1 is X+1,retractall(jogadas(_)),assert(jogadas(X1)).
-testa_quantidade:-jogadas(X),fuga(Y),((X>49,retractall(fuga(_)),assert(fuga(1)))|true).
-ajusta_casas_seg:-casas_seguras(S),retract(casas_seguras([_,0])).
-ajusta_casas_seg:-casas_seguras(S),retract(casas_seguras([0,_])).
-ajusta_casas_seg:-casas_seguras(S),retract(casas_seguras([_,5])).
-ajusta_casas_seg:-casas_seguras(S),retract(casas_seguras([5,_])).
+testa_quantidade:-jogadas(X),((X>49,retractall(fuga(_)),assert(fuga(1)))|true).
+ajusta_casas_seg:-retractall(casas_seguras([_,0])).
+ajusta_casas_seg:-retractall(casas_seguras([0,_])).
+ajusta_casas_seg:-retractall(casas_seguras([_,5])).
+ajusta_casas_seg:-retractall(casas_seguras([5,_])).
 ajusta_casas_seg:-casas_seguras([[X,Y]]),X<0,retract(casas_seguras([X,Y])).
 ajusta_casas_seg:-casas_seguras([[X,Y]]),Y<0,retract(casas_seguras([X,Y])).
  ajusta_casas_seg:-casas_seguras([[X,Y]]),X>5,retract(casas_seguras([X,Y])).
@@ -466,6 +466,7 @@ mover_agent(Percp,TESTE):-
     atual_posicao(POS),
     casas_seguintes(P),
     [A|B]=P,
+    %random_member(P1,P),
     agent_ouro(O),
     O=:=0,
     not(P==[]),
@@ -480,11 +481,10 @@ mover_agent(Percp,TESTE):-
         casas_nao_visitadas(Y),
         agent_ouro(O),
         O=:=0,
-        random_member(P1,Y),
-        last(Y,P1),
+        %random_member(P1,Y),
         [A|B]=Y,
         write('Escolha: '),writeln(A),
-        acao(POS,I,P1, TESTE),
+        acao(POS,I,A, TESTE),
             salva_pos_vis.
 
     mover_agent(_,TESTE):-
@@ -703,15 +703,16 @@ mover_agent(Percp,TESTE):-
             Y1<Y2,
             vira_direita.
          
-        acao([_,_],I,[_,_],goforward):-
-            casas_seguras(CasasSeguras),
-                         atual_posicao([Z,W]),
-                         nova_posicao(Z,W,I,Z1,W1),
-                         member([Z1,W1], CasasSeguras),
-                         atualiza_posicao.
+        % acao([_,_],I,[_,_],goforward):-
+        %   casas_seguras(CasasSeguras),
+        %                atual_posicao([Z,W]),
+        %                nova_posicao(Z,W,I,Z1,W1),
+        %                member([Z1,W1], CasasSeguras),
+        %                atualiza_posicao.
 
 
         acao(_,A,_,AC):-
-            random_member(AC,[turnright,turnleft,goforward]).
+            random_member(AC,[turnright,turnleft]),
+            ((AC==turnright,vira_direita)|(AC==turnleft, vira_esquerda)|(AC==goforward,atual_posicao([Z,W]),nova_posicao(Z,W,I,Z1,W1),member([Z1,W1], CasasSeguras),atualiza_posicao)).
 
 
